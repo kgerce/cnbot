@@ -9,39 +9,42 @@ const getAll = require('./util/location')
 const { c, color } = require('./util/log')
 const listen = mqtt.connect(process.env.MQTT_URL)
 
-let sessionCfg
-const SESSION_FILE_PATH = './session.json'
-if (fs.existsSync(SESSION_FILE_PATH)) sessionCfg = require(SESSION_FILE_PATH)
-
-const client = new Client({
-    qrTimeoutMs: 0,
-    authTimeoutMs: 0,
-    restartOnAuthFail: true,
-    takeoverOnConflict: true,
-    puppeteer: {
+const SESSION_FILE_PATH = "./session.json";
+// file is included here
+let sessionCfg;
+if (fs.existsSync(SESSION_FILE_PATH)) {
+  sessionCfg = require(SESSION_FILE_PATH);
+}
+client = new Client({	  
+    
+	     puppeteer: {
+        executablePath: '/usr/bin/chromium',
         headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--ignore-certificate-errors',
-            '--disable-web-security',
-            '--disable-site-isolation-trials',
-            '--log-level=3',
-            '--ignore-certificate-errors-spki-list',
-            '--disable-extensions',
-            '--disable-default-apps',
-            '--enable-features=NetworkService',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote'
-        ]
-    },
+		args: [
+      "--log-level=3", // fatal only
+   
+      "--no-default-browser-check",
+      "--disable-infobars",
+      "--disable-web-security",
+      "--disable-site-isolation-trials",
+      "--no-experiments",
+      "--ignore-gpu-blacklist",
+      "--ignore-certificate-errors",
+      "--ignore-certificate-errors-spki-list",
+    
+      "--disable-extensions",
+      "--disable-default-apps",
+      "--enable-features=NetworkService",
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+    
+      "--no-first-run",
+      "--no-zygote"
+    ]
+		
+    },	      
     session: sessionCfg
-})
-
-// ==========#yogs#========= Begin initialize client
-client.initialize()
-
+});
 // ==========#yogs#========= Event handler
 client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true })
